@@ -1,5 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const myIP = require('ip');
 
 // random port for handle multiple instance node in the same host
 const httpPort = 3000 + Math.floor(Math.random() * 10);
@@ -27,10 +28,9 @@ app.use(bodyParser.json());
 //   res.json(block);
 // });
 app.post('/addNode', (req, res) => {
-  console.log(`adding localhost host: ${req.body.host}:${req.body.port}`);
-  node.addNode(req.body.host, req.body.port);
+  node.addNode(myIP.address(), socketPort);
 
-  res.send();
+  res.send('Done');
 });
 
 app.listen(httpPort, () => {
