@@ -1,4 +1,5 @@
 const express = require('express');
+const request = require('request');
 const bodyParser = require('body-parser');
 const myIP = require('ip');
 
@@ -27,8 +28,31 @@ app.use(bodyParser.json());
 
 //   res.json(block);
 // });
-app.post('/addNode', (req, res) => {
-  node.addNode(myIP.address(), socketPort);
+
+/**
+ * Add current Node into network
+ * Must be know remote host and remote port
+ * ex: remote host: 10.0.0.118:3002
+ */
+app.post('/connect-to-network', (req, res) => {
+  const remoteHost = req.body.host;
+
+  request(
+    {
+      method: 'post',
+      url: remoteHost,
+      headers: { 'Content-Type': 'application/json' },
+      body: { host: myIP.address(), port: socketPort },
+      json: true
+    },
+    (error, response, body) => {
+      res.json({ error, response, body });
+    }
+  );
+});
+
+app.post('/add-note', (req, res) => {
+  node.addNode(req.body.host, req.body.port);
 
   res.send('Done');
 });
