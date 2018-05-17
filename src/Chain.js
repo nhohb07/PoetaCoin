@@ -49,7 +49,7 @@ class Chain {
    * Add new block into the chain
    * @param {Object} data 
    */
-  addBlock(data) {
+  createBlock(data) {
     const previousBlock = this.getLatestBlock();
     const index = previousBlock.index + 1;
     const previousHash = previousBlock.hash;
@@ -58,6 +58,51 @@ class Chain {
     this.chain.push(block);
 
     return block;
+  }
+
+  isValidChain(chain = this.chain) {
+    for (let i = 1; i < chain.length; i++) {
+      const currentBlock = chain[i];
+      const previousBlock = chain[i - 1];
+
+      if (!this.isValidBlock(currentBlock, previousBlock)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  replaceChain(newChain) {
+    if (!this.isValidChain(newChain)) {
+      console.log('\n\tReject Replace Chain, new chain is invalid');
+      return false;
+    }
+
+    console.log('\n\tReplaced Chain!');
+    this.chain = newChain;
+  }
+
+  addBlock(newBlock) {
+    if (!this.isValidBlock(newBlock)) {
+      console.log('\n\tReject invalid new block');
+      return false;
+    }
+
+    this.chain.push(newBlock);
+  }
+
+  isValidBlock(block, previousBlock = this.getLatestBlock()) {
+    if (block.previousHash !== previousBlock.hash) {
+      return false;
+    }
+
+    const newBlock = new Block(block.index, block.previousHash, block.data, block.timestamp);
+    if (block.hash !== newBlock.hash) {
+      return false;
+    }
+
+    return true;
   }
 }
 

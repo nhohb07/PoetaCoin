@@ -1,33 +1,34 @@
 const express = require('express');
 const request = require('request');
 const bodyParser = require('body-parser');
-const myIP = require('ip');
+const ip = require('ip');
+const myIP = ip.address();
 
 // random port for handle multiple instance node in the same host
-const httpPort = 3000 + Math.floor(Math.random() * 10);
-const socketPort = 18070 + Math.floor(Math.random() * 30);
+const httpPort = parseInt(process.env.HTTP_PORT) || 3000;
+const p2pPort = parseInt(process.env.P2P_PORT) || 6000;
 
 const Node = require('./src/Node');
-const node = new Node(socketPort);
+const node = new Node(myIP, p2pPort);
 
 const app = new express();
 app.use(bodyParser.json());
 
 
-// app.get('/blocks', (req, res) => {
-//   const blocks = poetaChain.getChain();
+app.get('/blocks', (req, res) => {
+  const blocks = node.poetaChain.getChain();
 
-//   res.json(blocks);
-// });
+  res.json(blocks);
+});
 
-// app.post('/create-block', (req, res) => {
-//   const block = poetaChain.addBlock({
-//     message: req.body.message
-//   });
-//   console.log('\nNew block created: ', block);
+app.post('/create-block', (req, res) => {
+  const block = node.createBlock({
+    message: req.body.message
+  });
+  console.log('\nNew block created: ', block);
 
-//   res.json(block);
-// });
+  res.json(block);
+});
 
 /**
  * Add current Node into network
@@ -35,28 +36,34 @@ app.use(bodyParser.json());
  * ex: remote host: 10.0.0.118:3002
  */
 app.post('/connect-to-network', (req, res) => {
-  const remoteHost = req.body.host;
+  const remoteHost = `http://${req.body.remoteHost}/add-node`;
 
   request(
     {
       method: 'post',
       url: remoteHost,
       headers: { 'Content-Type': 'application/json' },
-      body: { host: myIP.address(), port: socketPort },
+      body: { node: `${myIP}:${p2pPort}` },
       json: true
     },
     (error, response, body) => {
-      res.json({ error, response, body });
+      res.json({ body });
     }
   );
 });
 
-app.post('/add-note', (req, res) => {
-  node.addNode(req.body.host, req.body.port);
+app.post('/add-node', (req, res) => {
+  node.addNode(req.body.node);
+
+  res.send('Done');
+});
+
+app.post('/broadcast-message', (req, res) => {
+  node.broadcastMessage(req.body.event, req.body.message);
 
   res.send('Done');
 });
 
 app.listen(httpPort, () => {
-  console.log(`Node started at HTTP Port: ${httpPort}, Web Socket Port: ${socketPort}`);
+  console.log(`Node started at HTTP Port: ${httpPort}, Web Socket Port: ${p2pPort}`);
 });
