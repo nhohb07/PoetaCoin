@@ -11,6 +11,7 @@ class Node {
 
     const socketServer = new WebSocket.Server({ port: myPort });
     socketServer.on('connection', (connection) => {
+      console.log('connection in');
       this._handleConnection(connection)
     });
   }
@@ -41,6 +42,10 @@ class Node {
           this.poetaChain.addBlock(newBlock);
           this.broadcastMessage('NEW_BLOCK', data.data);
           break;
+
+        case 'GET_CHAIN':
+          this.broadcastMessage('CHAIN', this.poetaChain.chain, connection);
+          break;
       }
     });
 
@@ -53,7 +58,7 @@ class Node {
    * @param {*} connection 
    */
   _closeConnection(connection) {
-    console.log(`\n\tRemove Node: ${connection._socket.remoteAddress}:${connection._socket.remotePort}\n`, connection._socket);
+    console.log(`\n\tRemove Node`);
 
     this.nodes.splice(this.nodes.indexOf(connection), 1);
   }

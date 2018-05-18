@@ -1,0 +1,76 @@
+main {
+	padding: 10px;
+}
+
+.wrap {
+	margin: 100px auto;
+	list-style: none;
+	width: 100%;
+	padding: 0 500px 0 0;
+	display: table;
+}
+
+.wrap .chain:last-child::after {
+	display: none;
+}
+
+.chain {
+	width: 300px;
+	height: 200px;
+	text-align: center;
+	color: #000;
+	background: #b7dcfd;
+	border-radius: 50%;
+	vertical-align: middle;
+	position: relative;
+	border: 1px solid #aaa;
+	display: table-cell;
+}
+
+.chain:after {
+	content: "";
+	position: absolute;
+	float: right;
+	width: 10px;
+	height: 30px;
+	top: 43%;
+	right: -8px;
+	z-index: 10;
+	background-color: #7C9AAF;
+}
+
+.chain .table {
+	width: 300px;
+	height: 100%;
+	border-radius: 50%;
+	overflow: hidden;
+	margin-bottom: 0;
+}
+
+.chain .table td {
+	vertical-align: middle;
+}
+
+.chain .prev-hash {
+	width: 25%;
+	background-color: rgba(0, 0, 0, 0.3);
+}
+
+.chain .prev-hash span {
+	transform: rotate(-90deg);
+	display: block;
+}
+
+.chain .data {
+	width: 50%;
+}
+
+.chain .current-hash {
+	width: 25%;
+	background-color: rgba(0, 0, 0, 0.3);
+}
+
+.chain .current-hash span {
+	transform: rotate(-90deg);
+	display: block;
+}

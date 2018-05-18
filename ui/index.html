@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Poeta Coin - UI</title>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
+
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" crossorigin="anonymous">
+  <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+    <a class="navbar-brand" href="#">Fixed navbar</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse"
+      aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarCollapse">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item active">
+          <a class="nav-link" href="#">Home
+            <span class="sr-only">(current)</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Link</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link disabled" href="#">Disabled</a>
+        </li>
+      </ul>
+      <form class="form-inline mt-2 mt-md-0">
+        <input class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search">
+        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+      </form>
+    </div>
+  </nav>
+
+  <main role="main">
+
+    <ol class="wrap"></ol>
+
+
+  </main>
+
+  <script>
+    var ws = new WebSocket("ws://localhost:6001");
+
+    ws.onopen = function () {
+      console.log('onopen');
+      ws.send(JSON.stringify({ event: 'GET_CHAIN', data: {} }));
+    };
+
+    // Log errors
+    ws.onerror = function (error) {
+      console.error('WebSocket Error ' + error);
+    };
+
+    // Log messages from the server
+    ws.onmessage = function (e) {
+      const data = JSON.parse(e.data);
+      console.log('onmessage', data);
+
+      switch (data.event) {
+        case 'CHAIN':
+          const chain = data.data;
+          for (var i = 0; i < chain.length; i++) {
+            addBlock(chain[i]);
+            console.log('chain', chain.length);
+          }
+          break;
+
+        case 'NEW_BLOCK':
+          addBlock(data.data);
+          break;
+      }
+    };
+
+    function getElipsisString(string) {
+      string = string.toString();
+
+      if (string.length <= 8) {
+        return string;
+      }
+
+      return [string.toString().substring(0, 4), string.toString().slice(-4)].join('...')
+    }
+
+    function addBlock(block) {
+      const previousHash = getElipsisString(block.previousHash);
+      const hash = getElipsisString(block.hash);
+
+      var html = `
+      <li class="chain">
+        <table class="table table-borderless">
+          <tr>
+            <td class="prev-hash"><span>${previousHash}</span></td>
+            <td class="data">Data</td>
+            <td class="current-hash"><span>${hash}</span></td>
+          </tr>
+        </table>
+      </li>
+      `;
+
+      console.log('addBlock', block);
+
+      $('.wrap').append(html);
+    }
+  </script>
+</body>
+
+</html>
