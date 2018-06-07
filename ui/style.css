@@ -1,12 +1,13 @@
 main {
 	padding: 10px;
+	overflow-x: auto;
 }
 
 .wrap {
-	margin: 100px auto;
+	margin: 100px auto 50px;
 	list-style: none;
-	display: table;
-	padding: 0;
+	display: inline-flex;
+	padding: 0 50px;
 }
 
 .wrap .chain:last-child::after {
@@ -22,7 +23,12 @@ main {
 	vertical-align: middle;
 	position: relative;
 	border: 1px solid #aaa;
-	display: table-cell;
+	display: inline-block;
+	margin-right: 10px;
+}
+
+.chain:first-child {
+	background-color: bisque;
 }
 
 .chain:after {
@@ -57,6 +63,6 @@ main {
 	height: 75px;
 }
 
-.chain-sep {
-	width: 10px;
+.transaction-form {
+	padding-top: 30px;
 }

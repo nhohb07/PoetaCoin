@@ -35,7 +35,7 @@ app.post('/create-block', (req, res) => {
   });
   console.log('\nNew block created: ', block);
 
-  res.json(block);
+  res.json({ success: true });
 });
 
 /**

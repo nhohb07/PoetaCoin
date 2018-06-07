@@ -16,7 +16,7 @@
 
 <body>
   <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
-    <a class="navbar-brand" href="#">Fixed navbar</a>
+    <a class="navbar-brand" href="#">Poeta Coin</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse"
       aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
@@ -39,18 +39,55 @@
         <input class="form-control mr-sm-2" type="text" placeholder="Enter remote host" id="remoteHost">
         <button class="btn btn-outline-success my-2 my-sm-0" type="button" onclick="connectToNetwork()">Connect</button>
       </form>
+      <div class="form-inline mt-2 mt-md-0 text-success" id="textConnectToNetwork" style="display: none">
+        Connected to network!
+      </div>
+
     </div>
   </nav>
 
   <main role="main">
-
     <ol class="wrap"></ol>
-
-
   </main>
 
+  <div class="container transaction-form">
+    <h3>Transfer coin:</h3>
+
+    <form onsubmit="return false;">
+      <div class="form-group row">
+        <label for="staticEmail" class="col-sm-2 col-form-label">Receiver:</label>
+        <div class="col-sm-10">
+          <select class="form-control" id="transfer-receiver">
+            <option></option>
+            <option value="Son Le">Son Le</option>
+            <option value="Hoang Ho">Hoang Ho</option>
+            <option value="Truong Tong">Truong Tong</option>
+            <option value="Tin Nguyen">Tin Nguyen</option>
+            <option value="Nho Huynh">Nho Huynh</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="inputPassword" class="col-sm-2 col-form-label">Amount:</label>
+        <div class="col-sm-10">
+          <input type="number" class="form-control" id="transfer-amount" value="10">
+        </div>
+      </div>
+
+      <div class="form-group row">
+        <label for="inputPassword" class="col-sm-2 col-form-label"></label>
+        <div class="col-sm-10">
+          <button type="button" class="btn btn-primary" onclick="transferCoin()">Transfer</button>
+        </div>
+      </div>
+    </form>
+  </div>
+
   <script>
-    var ws = new WebSocket("ws://localhost:6001");
+    var chain = [];
+
+    var myHost = [window.location.hostname, window.location.port].join(':');
+    var ws = new WebSocket(`ws://${window.location.hostname}:6001`);
 
     ws.onopen = function () {
       console.log('onopen');
@@ -74,7 +111,6 @@
           const chain = data.data;
           for (var i = 0; i < chain.length; i++) {
             addBlock(chain[i]);
-            console.log('chain', chain.length);
           }
           break;
 
@@ -95,8 +131,15 @@
     }
 
     function addBlock(block) {
+      var previousBlock = chain[chain.length - 1];
+
+      if (JSON.stringify(block) === JSON.stringify(previousBlock)) {
+        return;
+      }
+
+      chain.push(block);
+
       var html = `
-      <li class="chain-sep"></li>
       <li class="chain">
         <div class="prev-hash">Previous Hash:<br>${block.previousHash}</div>
         <div class="data">Data:<br>${JSON.stringify(block.data, null, 2)}</div>
@@ -113,7 +156,7 @@
   <script>
     function getAllNodes() {
       $.ajax({
-        url: 'http://localhost:3001/nodes',
+        url: `http://${myHost}/nodes`,
         type: "GET",
         contentType: 'application/json',
         success: (data) => {
@@ -121,11 +164,11 @@
 
           if (data.length) {
             $('#formConnectToNetwork').hide();
+            $('#textConnectToNetwork').show();
           }
         }
       });
     }
-
 
     function connectToNetwork() {
       const remoteHost = $('#remoteHost').val();
@@ -135,14 +178,44 @@
       }
 
       $.ajax({
-        url: 'http://localhost:3001/connect-to-network',
+        url: `http://${myHost}/connect-to-network`,
         type: "POST",
         contentType: 'application/json',
         data: JSON.stringify({ remoteHost: remoteHost }),
         success: (data) => {
-          if (data.success) {
+          if (data.body.success) {
             alert('Connected to network!');
             $('#formConnectToNetwork').hide();
+            $('#textConnectToNetwork').show();
+
+            ws.send(JSON.stringify({ event: 'GET_CHAIN', data: {} }));
+          } else {
+            alert('Unable to connect to remote host: ' + remoteHost);
+          }
+        }
+      });
+    }
+
+    function transferCoin() {
+      const transferReceiver = $('#transfer-receiver').val();
+      const transferAmount = $('#transfer-amount').val();
+
+      $.ajax({
+        url: `http://${myHost}/create-block`,
+        type: "POST",
+        contentType: 'application/json',
+        data: JSON.stringify({
+          message: {
+            from: 'Nho Huynh',
+            to: transferReceiver,
+            amount: transferAmount
+          }
+        }),
+        success: (data) => {
+          if (data.body.success) {
+            alert('Connected to network!');
+            $('#formConnectToNetwork').hide();
+            $('#textConnectToNetwork').show();
           } else {
             alert('Unable to connect to remote host: ' + remoteHost);
           }
