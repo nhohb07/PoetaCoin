@@ -46,6 +46,8 @@ app.post('/create-block', (req, res) => {
 app.post('/connect-to-network', (req, res) => {
   const remoteHost = `http://${req.body.remoteHost}/add-node`;
 
+  console.log('connect-to-network', req.body);
+
   request(
     {
       method: 'post',
@@ -64,15 +66,21 @@ app.post('/connect-to-network', (req, res) => {
 app.post('/add-node', (req, res) => {
   node.addNode(req.body.node);
 
-  res.send('Done');
+  res.json({ success: true });
 });
 
 // broadcast message into nodes in network
 app.post('/broadcast-message', (req, res) => {
   node.broadcastMessage(req.body.event, req.body.message);
 
-  res.send('Done');
+  res.json({ success: true });
 });
+
+// Get all blocks from chain
+app.get('/nodes', (req, res) => {
+  res.json(node.getAllNodes());
+});
+
 
 // start app
 app.listen(httpPort, () => {

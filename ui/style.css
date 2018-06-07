@@ -5,9 +5,8 @@ main {
 .wrap {
 	margin: 100px auto;
 	list-style: none;
-	width: 100%;
-	padding: 0 500px 0 0;
 	display: table;
+	padding: 0;
 }
 
 .wrap .chain:last-child::after {
@@ -16,11 +15,10 @@ main {
 
 .chain {
 	width: 300px;
-	height: 200px;
+	height: 300px;
 	text-align: center;
 	color: #000;
 	background: #b7dcfd;
-	border-radius: 50%;
 	vertical-align: middle;
 	position: relative;
 	border: 1px solid #aaa;
@@ -31,46 +29,34 @@ main {
 	content: "";
 	position: absolute;
 	float: right;
-	width: 10px;
+	width: 25px;
 	height: 30px;
 	top: 43%;
-	right: -8px;
+	right: -19px;
 	z-index: 10;
 	background-color: #7C9AAF;
 }
 
-.chain .table {
-	width: 300px;
-	height: 100%;
-	border-radius: 50%;
-	overflow: hidden;
-	margin-bottom: 0;
-}
-
-.chain .table td {
-	vertical-align: middle;
+.chain>div {
+	word-break: break-all;
+	font-size: 14px;
 }
 
 .chain .prev-hash {
-	width: 25%;
 	background-color: rgba(0, 0, 0, 0.3);
-}
-
-.chain .prev-hash span {
-	transform: rotate(-90deg);
-	display: block;
+	height: 75px;
 }
 
 .chain .data {
-	width: 50%;
+	height: 150px;
+	overflow: auto;
 }
 
 .chain .current-hash {
-	width: 25%;
 	background-color: rgba(0, 0, 0, 0.3);
+	height: 75px;
 }
 
-.chain .current-hash span {
-	transform: rotate(-90deg);
-	display: block;
+.chain-sep {
+	width: 10px;
 }

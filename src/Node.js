@@ -99,6 +99,10 @@ class Node {
 
     return block;
   }
+
+  getAllNodes() {
+    return this.nodes.map(node => node._socket.address());
+  }
 }
 
 module.exports = Node;

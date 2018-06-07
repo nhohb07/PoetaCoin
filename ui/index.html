@@ -35,9 +35,9 @@
           <a class="nav-link disabled" href="#">Disabled</a>
         </li>
       </ul>
-      <form class="form-inline mt-2 mt-md-0">
-        <input class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search">
-        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+      <form class="form-inline mt-2 mt-md-0" id="formConnectToNetwork">
+        <input class="form-control mr-sm-2" type="text" placeholder="Enter remote host" id="remoteHost">
+        <button class="btn btn-outline-success my-2 my-sm-0" type="button" onclick="connectToNetwork()">Connect</button>
       </form>
     </div>
   </nav>
@@ -55,6 +55,8 @@
     ws.onopen = function () {
       console.log('onopen');
       ws.send(JSON.stringify({ event: 'GET_CHAIN', data: {} }));
+
+      getAllNodes();
     };
 
     // Log errors
@@ -85,32 +87,67 @@
     function getElipsisString(string) {
       string = string.toString();
 
-      if (string.length <= 8) {
+      if (string.length <= 20) {
         return string;
       }
 
-      return [string.toString().substring(0, 4), string.toString().slice(-4)].join('...')
+      return [string.toString().substring(0, 10), string.toString().slice(-10)].join('...')
     }
 
     function addBlock(block) {
-      const previousHash = getElipsisString(block.previousHash);
-      const hash = getElipsisString(block.hash);
-
       var html = `
+      <li class="chain-sep"></li>
       <li class="chain">
-        <table class="table table-borderless">
-          <tr>
-            <td class="prev-hash"><span>${previousHash}</span></td>
-            <td class="data">Data</td>
-            <td class="current-hash"><span>${hash}</span></td>
-          </tr>
-        </table>
+        <div class="prev-hash">Previous Hash:<br>${block.previousHash}</div>
+        <div class="data">Data:<br>${JSON.stringify(block.data, null, 2)}</div>
+        <div class="current-hash">Current Hash:<br>${block.hash}</div>
       </li>
       `;
 
       console.log('addBlock', block);
 
       $('.wrap').append(html);
+    }
+  </script>
+
+  <script>
+    function getAllNodes() {
+      $.ajax({
+        url: 'http://localhost:3001/nodes',
+        type: "GET",
+        contentType: 'application/json',
+        success: (data) => {
+          data = data.filter(node => node.address !== '::1');
+
+          if (data.length) {
+            $('#formConnectToNetwork').hide();
+          }
+        }
+      });
+    }
+
+
+    function connectToNetwork() {
+      const remoteHost = $('#remoteHost').val();
+
+      if (!remoteHost) {
+        return alert('Please enter remote host IP:Port');
+      }
+
+      $.ajax({
+        url: 'http://localhost:3001/connect-to-network',
+        type: "POST",
+        contentType: 'application/json',
+        data: JSON.stringify({ remoteHost: remoteHost }),
+        success: (data) => {
+          if (data.success) {
+            alert('Connected to network!');
+            $('#formConnectToNetwork').hide();
+          } else {
+            alert('Unable to connect to remote host: ' + remoteHost);
+          }
+        }
+      });
     }
   </script>
 </body>
